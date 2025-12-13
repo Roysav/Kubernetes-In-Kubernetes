@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "common.fullname" . }}
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: 2379
+      targetPort: etcd-client
+      protocol: TCP
+      name: etcd-client
+
+  selector:
+    {{- include "common.selectorLabels" . | nindent 4 }}

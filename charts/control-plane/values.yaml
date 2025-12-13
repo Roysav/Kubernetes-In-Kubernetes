@@ -1,0 +1,10 @@
+global:
+  useReleaseConfigMap: true
+  image:
+    registry: registry.k8s.io
+    tag: v1.34.2
+  issuer:
+    name: "" # defaults to {{ .Release.Name }}
+
+smokeTest:
+  image: bitnami/kubectl

@@ -1,0 +1,103 @@
+replicaCount: 1
+image:
+  repository: kube-apiserver
+  pullPolicy: IfNotPresent
+  tag: ""
+
+useReleaseConfigMap: true
+command:
+  - kube-apiserver
+  - '--allow-privileged=true'
+  - '--audit-log-maxage=30'
+  - '--audit-log-maxbackup=3'
+  - '--audit-log-maxsize=100'
+  - '--audit-log-path=/var/log/audit.log'
+  - '--authorization-mode=Node,RBAC'
+  - '--bind-address=0.0.0.0'
+  - '--client-ca-file=/var/lib/kubernetes/ca.crt'
+  - '--enable-admission-plugins=NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota'
+  - '--etcd-servers=http://$(ETCD_ADDR):2379'
+  - '--event-ttl=1h'
+  - '--encryption-provider-config=/var/lib/kubernetes/encryption-config.yaml'
+  - '--kubelet-certificate-authority=/var/lib/kubernetes/ca.crt'
+  - '--kubelet-client-certificate=/var/lib/kubernetes/kube-api-server.crt'
+  - '--kubelet-client-key=/var/lib/kubernetes/kube-api-server.key'
+  - '--runtime-config=api/all=true'
+  - '--service-account-key-file=/var/lib/kubernetes/service-accounts.crt'
+  - '--service-account-signing-key-file=/var/lib/kubernetes/service-accounts.key'
+  - '--service-account-issuer=https://server.kubernetes.local:6443'
+  - '--service-node-port-range=30000-32767'
+  - '--tls-cert-file=/var/lib/kubernetes/kube-api-server.crt'
+  - '--tls-private-key-file=/var/lib/kubernetes/kube-api-server.key'
+  - '--v=2'
+
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 6443
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources: {}
+
+#livenessProbe:
+#  httpGet:
+#    path: /
+#    port: http
+#readinessProbe:
+#  httpGet:
+#    path: /
+#    port: http
+
+# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+encryptionConfig:
+  kind: EncryptionConfiguration
+  apiVersion: apiserver.config.k8s.io/v1
+  resources:
+    - resources:
+        - secrets
+      providers:
+        - aescbc:
+            keys:
+              - name: key1
+                secret: YXNkc2c4b3k1OHk0d21vCg==
+        - identity: { }

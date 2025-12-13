@@ -1,0 +1,35 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "common.fullname" . }}
+spec:
+  secretName: {{ include "common.fullname" . }}
+  commonName: kubernetes
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: {{ include "common.release.fullname" . }}
+    kind: Issuer
+    group: cert-manager.io
+  subject:
+    countries: [ "US" ]
+    provinces: [ "Washington" ]
+    localities: [ "Seattle" ]
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    - client auth
+  dnsNames:
+    - kubernetes
+    - kubernetes.default
+    - kubernetes.default.svc
+    - kubernetes.default.svc.cluster
+    - kubernetes.svc.cluster.local
+    - server.kubernetes.local
+    - api-server.kubernetes.local
+    - {{ include "common.fullname" . }}
+  ipAddresses:
+    - 127.0.0.1
+    - 10.32.0.1
