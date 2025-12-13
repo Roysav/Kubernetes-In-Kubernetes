@@ -6,5 +6,7 @@ global:
   issuer:
     name: "" # defaults to {{ .Release.Name }}
 
-smokeTest:
-  image: bitnami/kubectl
+image:
+  registry: registry-1.docker.io
+  repository: bitnami/kubectl
+  tag: latest

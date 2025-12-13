@@ -1,0 +1,5 @@
+Get the kubeconfig, run:
+
+```
+kubectl -n {{ .Release.Namespace }} get secret {{ include "common.release.fullname" . }}-admin-kubeconfig -o template='{{`{{ .data.config }}`}}' | base64 -d > ~/.kube/config
+```

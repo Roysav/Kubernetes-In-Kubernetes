@@ -8,7 +8,7 @@ spec:
 
   containers:
     - name: kubectl
-      image: {{ .Values.smokeTest.image }}
+      image: {{ include "common.image" . }}
       command:
         - /bin/sh
         - -c
