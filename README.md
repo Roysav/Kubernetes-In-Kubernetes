@@ -6,6 +6,7 @@ Kubernetes-in-Kubernetes a.k.a **KinK** is a way to run a Kubernetes control-pla
 Currently the only components that are up and running are
 - etcd (a statefulset of single replica, yes I know)
 - kube-apiserver
+- kube-controller-manager
 
 
 This chart rely on [cert-manager](https://cert-manager.io/).
