@@ -19,3 +19,8 @@ dependencies:
     alias: kube-controller-manager
     repository: file://../base
     version: '*'
+
+  - name: base
+    alias: kube-scheduler
+    repository: file://../base
+    version: '*'

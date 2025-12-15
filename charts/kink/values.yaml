@@ -3,8 +3,7 @@ global:
     registry: registry.k8s.io
     tag: v1.34.2
 
-  issuer:
-    name:
+  clusterAddress: https://kubernetes.test:6443
 
 certificates:
   root-ca:
@@ -31,7 +30,7 @@ certificates:
       - server.kubernetes.local
       - api-server.kubernetes.local
       - '{{ include "base.fullname" (get .Subcharts "kube-apiserver") }}'
-      - '{{ (get .Values "kube-apiserver").route.host }}'
+      - '{{ .Values.global.clusterAddress }}'
 
   kube-controller-manager:
     commonName: system:kube-controller-manager
@@ -47,6 +46,13 @@ certificates:
 
     dnsNames:
       - kube-controller-manager
+
+  kube-scheduler:
+    commonName: system:kube-scheduler
+    subject:
+      organizations:
+        - system:kube-scheduler
+
 
 issuer:
   create: true
@@ -188,12 +194,9 @@ kube-apiserver:
 
   service:
     enabled: true
-    type: NodePort
     ports:
       - name: kube-apiserver
         port: 6443
-        targetPort: 6443
-        nodePort: 5443
 
   livenessProbe:
     httpGet:
@@ -268,3 +271,9 @@ kube-controller-manager:
     - root-ca
     - kube-controller-manager
     - service-accounts
+
+
+kube-scheduler:
+  image:
+    repository: kube-scheduler
+

@@ -1,0 +1,6 @@
+type: NodePort
+ports:
+  - name: kube-apiserver
+    port: 6443
+    targetPort: 6443
+    nodePort: 30443
