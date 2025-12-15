@@ -48,7 +48,10 @@ certificates:
       - kube-controller-manager
 
 issuer:
+  create: true
   name:
+  spec:
+    selfSigned: {}
 
 etcd:
   command: [/usr/local/bin/etcd]
@@ -189,25 +192,27 @@ kube-apiserver:
       - name: kube-apiserver
         port: 6443
 
-#  livenessProbe:
-#    httpGet:
-#      path: /livez?verbose
-#      port: 6443
-#      initialDelaySeconds: 15
-#      periodSeconds: 10
-#      timeoutSeconds: 5
-#      failureThreshold: 10
-#
-#  readinessProbe:
-#    httpGet:
-#      path: /readyz?verbose
-#      port: 6443
-#    initialDelaySeconds: 10
-#    periodSeconds: 5
-#    timeoutSeconds: 5
-#    successThreshold: 1
-#    failureThreshold: 30
-#
+  livenessProbe:
+    httpGet:
+      path: /livez?verbose
+      port: 6443
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 10
+      scheme: HTTPS
+
+  readinessProbe:
+    httpGet:
+      path: /readyz?verbose
+      port: 6443
+      scheme: HTTPS
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 30
+
 
 
 kube-controller-manager:

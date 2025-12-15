@@ -1,6 +1,7 @@
+{{- if .Values.issuer.create }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ .Release.Name }}
-spec:
-  selfSigned: {}
+spec: {{- .Values.issuer.spec | toYaml | nindent 2 }}
+{{- end }}
