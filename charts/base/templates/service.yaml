@@ -13,6 +13,7 @@ spec:
       port: {{ .port }}
       targetPort: {{ .targetPort | default .port }}
       protocol: {{ .protocol | default "TCP" }}
+      nodePort: {{ .nodePort | default "" }}
     {{- end }}
   selector:
     {{- include "base.selectorLabels" . | nindent 4 }}

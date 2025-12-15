@@ -31,6 +31,7 @@ certificates:
       - server.kubernetes.local
       - api-server.kubernetes.local
       - '{{ include "base.fullname" (get .Subcharts "kube-apiserver") }}'
+      - '{{ (get .Values "kube-apiserver").route.host }}'
 
   kube-controller-manager:
     commonName: system:kube-controller-manager
@@ -187,10 +188,12 @@ kube-apiserver:
 
   service:
     enabled: true
-
+    type: NodePort
     ports:
       - name: kube-apiserver
         port: 6443
+        targetPort: 6443
+        nodePort: 5443
 
   livenessProbe:
     httpGet:

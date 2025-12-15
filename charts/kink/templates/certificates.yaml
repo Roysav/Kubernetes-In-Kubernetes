@@ -18,7 +18,10 @@ spec:
   usages: {{- $spec.usages | toYaml | nindent 4 }}
   dnsNames:
     {{- range $dnsName := ($spec.dnsNames | default (list)) }}
-    - {{ tpl $dnsName $ | quote }}
+    {{- $result := tpl $dnsName $ | quote }}
+    {{- if $result}}
+    - {{ $result }}
+    {{- end }}
     {{- end }}
 ---
 {{- end }}
