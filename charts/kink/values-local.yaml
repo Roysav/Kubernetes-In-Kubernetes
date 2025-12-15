@@ -1,3 +1,16 @@
+global:
+  clusterHost: kubernetes.local
+
+
+certificates:
+  admin:
+    commonName: admin
+    subject:
+      organizations:
+        - system:masters
+    usages:
+      - client auth
+
 kube-apiserver:
   service:
     type: NodePort

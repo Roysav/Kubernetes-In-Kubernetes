@@ -3,7 +3,7 @@ global:
     registry: registry.k8s.io
     tag: v1.34.2
 
-  clusterAddress: https://kubernetes.test:6443
+  clusterHost: ""
 
 certificates:
   root-ca:
@@ -30,7 +30,7 @@ certificates:
       - server.kubernetes.local
       - api-server.kubernetes.local
       - '{{ include "base.fullname" (get .Subcharts "kube-apiserver") }}'
-      - '{{ .Values.global.clusterAddress }}'
+      - '{{ .Values.global.clusterHost }}'
 
   kube-controller-manager:
     commonName: system:kube-controller-manager
