@@ -1,0 +1,261 @@
+global:
+  image:
+    registry: registry.k8s.io
+    tag: v1.34.2
+
+  issuer:
+    name:
+
+certificates:
+  root-ca:
+    commonName: CA
+    isCa: true
+  service-accounts:
+    commonName: service-accounts
+
+  kubernetes:
+    commonName: kubernetes
+    usages:
+      - digital signature
+      - key encipherment
+      - server auth
+      - client auth
+    dnsNames:
+      - kubernetes
+      - kubernetes
+      - kubernetes.default
+      - kubernetes.default.svc
+      - kubernetes.default.svc.cluster
+      - kubernetes.svc.cluster.local
+      - server.kubernetes.local
+      - api-server.kubernetes.local
+      - '{{ include "base.fullname" (get .Subcharts "kube-apiserver") }}'
+
+  kube-controller-manager:
+    commonName: system:kube-controller-manager
+    subject:
+      organizations:
+        - system:kube-controller-manager
+
+    usages:
+      - digital signature
+      - key encipherment
+      - server auth
+      - client auth
+
+    dnsNames:
+      - kube-controller-manager
+
+issuer:
+  name:
+
+etcd:
+  command: [/usr/local/bin/etcd]
+  args:
+    - --name=$(HOSTNAME)
+    - --data-dir=/data
+    - --wal-dir=/data/wal
+    - --listen-peer-urls=$(URI_SCHEME)://0.0.0.0:2380
+    - --listen-client-urls=$(URI_SCHEME)://0.0.0.0:2379
+    - --advertise-client-urls=$(URI_SCHEME)://$(HOSTNAME).$(SERVICE_NAME):2379
+    - --initial-cluster-state=new
+    - --listen-metrics-urls=http://0.0.0.0:8080
+
+  env:
+    - name: K8S_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+    - name: HOSTNAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+    - name: SERVICE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.annotations['serviceName']
+    - name: URI_SCHEME
+      value: "http"
+    - name: ETCDCTL_ENDPOINTS
+      value: http://127.0.0.1:2379
+
+  image:
+    registry: quay.io
+    repository: coreos/etcd
+    tag: v3.5.21
+
+  service:
+    enabled: true
+    ports:
+      - name: etcd-client
+        port: 2379
+      - name: etcd-peer
+        port: 2380
+  podAntiAffinity: |-
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - {{ include "base.name" . }}
+
+            - key: app.kubernetes.io/instance
+              operator: In
+              values:
+                - {{ .Release.Name }}
+        topologyKey: "kubernetes.io/hostname"
+
+  persistence:
+    enabled: true
+    volumeClaimTemplates:
+      - metadata:
+          name: etcd-data
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi
+
+  volumeMounts:
+    - name: etcd-data
+      mountPath: /data
+
+
+  livenessProbe:
+    httpGet:
+      path: /livez
+      port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /readyz
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 30
+
+kube-apiserver:
+  image:
+    repository: kube-apiserver
+
+  command:
+    - kube-apiserver
+    - '--allow-privileged=true'
+    - '--audit-log-maxage=30'
+    - '--audit-log-maxbackup=3'
+    - '--audit-log-maxsize=100'
+    - '--audit-log-path=/var/log/audit.log'
+    - '--authorization-mode=Node,RBAC'
+    - '--bind-address=0.0.0.0'
+    - '--client-ca-file=/etc/ssl/client/ca.crt'
+    - '--enable-admission-plugins=NamespaceLifecycle,NodeRestriction,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota'
+    - '--etcd-servers=http://$(ETCD_SERVICE_NAME):2379'
+    - '--event-ttl=1h'
+    - '--kubelet-certificate-authority=/etc/ssl/client/ca.crt'
+    - '--kubelet-client-certificate=/etc/ssl/client/tls.crt'
+    - '--kubelet-client-key=/etc/ssl/client/tls.key'
+    - '--runtime-config=api/all=true'
+    - '--service-account-key-file=/etc/ssl/service-accounts/tls.crt'
+    - '--service-account-signing-key-file=/etc/ssl/service-accounts/tls.key'
+    - '--service-account-issuer=https://server.kubernetes.local:6443'
+    - '--service-node-port-range=30000-32767'
+    - '--tls-cert-file=/etc/ssl/client/tls.crt'
+    - '--tls-private-key-file=/etc/ssl/client/tls.key'
+    - '--v=2'
+
+  volumeMounts:
+    - name: kubernetes-certificate
+      mountPath: /etc/ssl/client
+
+    - name: service-accounts-certificate
+      mountPath: /etc/ssl/service-accounts
+
+  certificates:
+    - kubernetes
+    - service-accounts
+
+  service:
+    enabled: true
+
+    ports:
+      - name: kube-apiserver
+        port: 6443
+
+#  livenessProbe:
+#    httpGet:
+#      path: /livez?verbose
+#      port: 6443
+#      initialDelaySeconds: 15
+#      periodSeconds: 10
+#      timeoutSeconds: 5
+#      failureThreshold: 10
+#
+#  readinessProbe:
+#    httpGet:
+#      path: /readyz?verbose
+#      port: 6443
+#    initialDelaySeconds: 10
+#    periodSeconds: 5
+#    timeoutSeconds: 5
+#    successThreshold: 1
+#    failureThreshold: 30
+#
+
+
+kube-controller-manager:
+  image:
+    repository: kube-controller-manager
+
+  command:
+    - kube-controller-manager
+
+  args:
+    - --bind-address=0.0.0.0
+    - --cluster-name=$(RELEASE_NAME)
+    - --cluster-signing-cert-file=/etc/ssl/ca/tls.crt
+    - --cluster-signing-key-file=/etc/ssl/ca/tls.key
+    - --root-ca-file=/etc/ssl/ca/ca.crt
+    - --service-account-private-key-file=/etc/ssl/service-accounts/tls.key
+    - --kubeconfig=/etc/.kube/config
+    - --service-cluster-ip-range=10.32.0.0/24
+    - --use-service-account-credentials=true
+    - --v=2
+
+  kubeConfig:
+    enabled: true
+    user: system:kube-controller-manager
+
+  env:
+    - name: KUBECONFIG
+      value: /etc/.kube/config
+
+    - name: RELEASE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.labels['app.kubernetes.io/instance']
+
+  volumeMounts:
+    - name: kube-controller-manager-certificate
+      mountPath: /etc/ssl/kubernetes
+
+    - name: service-accounts-certificate
+      mountPath: /etc/ssl/service-accounts
+
+    - name: kubeconfig
+      mountPath: /etc/.kube
+
+    - name: root-ca-certificate
+      mountPath: /etc/ssl/ca
+
+
+  certificates:
+    - root-ca
+    - kube-controller-manager
+    - service-accounts

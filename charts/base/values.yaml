@@ -1,0 +1,80 @@
+replicaCount: 1
+
+
+persistence:
+  enabled: false
+  volumeClaimTemplates: []
+
+global:
+  image:
+    registry: ""
+    tag: ""
+
+command: []
+image:
+  registry: ""
+  repository:
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+
+service:
+  enabled: false
+  type: ClusterIP
+  ports: []
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host:
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+
+resources: {}
+
+
+podAntiAffinity: |-
+livenessProbe:
+readinessProbe:
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+volumes: []
+volumesTpl: |-
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+env: []
+
+issuer:
+  name: ""
+
+certificates: []
+
+# create mount kubeconfig
+kubeConfig:
+  enabled: true

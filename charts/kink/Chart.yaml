@@ -1,0 +1,21 @@
+apiVersion: v2
+name: kink
+description: A Helm chart for Kubernetes
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
+dependencies:
+  - name: base
+    alias: etcd
+    repository: file://../base
+    version: '*'
+
+  - name: base
+    alias: kube-apiserver
+    repository: file://../base
+    version: '*'
+
+  - name: base
+    alias: kube-controller-manager
+    repository: file://../base
+    version: '*'

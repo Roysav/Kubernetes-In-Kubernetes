@@ -1,0 +1,27 @@
+{{- if .Values.kubeConfig.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "base.fullname" . }}-kube
+data:
+  config: |-
+    apiVersion: v1
+    kind: Config
+    clusters:
+      - name: {{ .Release.Name }}
+        cluster:
+          # I'm to lazy rn aint gonna lie
+          server: {{ .Values.global.kubeapiUrl | default (print "https://" .Release.Name "-kube-apiserver:6443") }}
+          certificate-authority: {{ .Values.kubeConfig.caPath | default "/etc/ssl/kubernetes/ca.crt"}}
+    contexts:
+      - name: default
+        context:
+          cluster: {{ .Release.Name }}
+          user: {{ .Values.kubeConfig.user }}
+    current-context: default
+    users:
+      - name: {{ .Values.kubeConfig.user }}
+        user:
+          client-key: {{ .Values.kubeConfig.clientKeyPath | default "/etc/ssl/kubernetes/tls.key" }}
+          client-certificate: {{ .Values.kubeConfig.clientKeyPath | default "/etc/ssl/kubernetes/tls.crt" }}
+{{- end }}

@@ -1,0 +1,39 @@
+{{ if not .Values.persistence.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "base.fullname" . }}
+  labels:
+    {{- include "base.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "base.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "base.selectorLabels" . | nindent 8 }}
+        {{- include "base.kv" .Values.podLabels | nindent 10 }}
+      annotations:
+        serviceName: {{ include "base.fullname" . }}
+        {{- include "base.kv" .Values.podAnnotations | nindent 10 }}
+    spec:
+      automountServiceAccountToken: false
+      affinity:
+        podAntiAffinity: {{- tpl .Values.podAntiAffinity . | nindent 10 }}
+
+      containers:
+        - name: {{ include "base.name" . }}
+          image: {{ include "base.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          readinessProbe: {{- .Values.readinessProbe | toYaml | nindent 12 }}
+          livenessProbe: {{- .Values.livenessProbe | toYaml | nindent 12 }}
+          volumeMounts: {{- .Values.volumeMounts | toYaml | nindent 12 }}
+          command: {{- .Values.command | toYaml | nindent 12 }}
+          args: {{- .Values.args | toYaml | nindent 12 }}
+          env: {{- .Values.env |toYaml | nindent 12 }}
+          envFrom: {{- include "base.envFrom" . | nindent 12}}
+      volumes: {{- include "base.volumes" . | nindent 8 }}
+{{ end }}

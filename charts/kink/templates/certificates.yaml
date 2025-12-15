@@ -1,0 +1,24 @@
+{{- range $name, $spec := .Values.certificates }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}
+spec:
+  secretName: {{ $.Release.Name }}-{{ $name }}
+  commonName: {{ $spec.commonName }}
+  isCA: {{ $spec.isCa | default false }}
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+
+  issuerRef:
+    name: {{ include "kink.issuerName" $ }}
+    kind: Issuer
+    group: cert-manager.io
+  usages: {{- $spec.usages | toYaml | nindent 4 }}
+  dnsNames:
+    {{- range $dnsName := ($spec.dnsNames | default (list)) }}
+    - {{ tpl $dnsName $ | quote }}
+    {{- end }}
+---
+{{- end }}
