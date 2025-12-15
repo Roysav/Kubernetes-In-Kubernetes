@@ -6,7 +6,7 @@ metadata:
 spec:
   secretName: {{ $.Release.Name }}-{{ $name }}
   commonName: {{ $spec.commonName }}
-  isCA: {{ $spec.isCa | default false }}
+  isCA: {{ $spec.isCA | default false }}
   privateKey:
     algorithm: ECDSA
     size: 256

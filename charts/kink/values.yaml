@@ -9,7 +9,8 @@ global:
 certificates:
   root-ca:
     commonName: CA
-    isCa: true
+    isCA: true
+
   service-accounts:
     commonName: service-accounts
 
