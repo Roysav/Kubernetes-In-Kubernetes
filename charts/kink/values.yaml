@@ -6,10 +6,6 @@ global:
   clusterHost: ""
 
 certificates:
-  root-ca:
-    commonName: CA
-    isCA: true
-
   service-accounts:
     commonName: service-accounts
 

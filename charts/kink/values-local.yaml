@@ -8,8 +8,12 @@ certificates:
     subject:
       organizations:
         - system:masters
-    usages:
-      - client auth
+
+#    usages:
+#      - digital signature
+#      - key encipherment
+#      - server auth
+#      - client auth
 
 kube-apiserver:
   service:

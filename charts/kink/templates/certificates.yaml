@@ -10,7 +10,7 @@ spec:
   privateKey:
     algorithm: ECDSA
     size: 256
-
+  subject: {{ $spec.subject | toYaml | nindent 4 }}
   issuerRef:
     name: {{ include "kink.issuerName" $ }}
     kind: Issuer

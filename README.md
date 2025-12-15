@@ -20,7 +20,8 @@ helm install -n kink --create-namespace charts/kink
 ```
 
 ```shell
-mkdir ./kink-certs
+mkdir -p ./kink-certs
+
 kubectl -n kink get secret kink-admin -o template='{{index .data "tls.key" }}'  | base64 -d > ./kink-certs/tls.key
 kubectl -n kink get secret kink-admin -o template='{{index .data "tls.crt" }}' | base64 -d > ./kink-certs/tls.crt
 kubectl -n kink get secret kink-root-ca -o template='{{index .data "ca.crt" }}' | base64 -d > ./kink-certs/ca.crt
@@ -44,6 +45,6 @@ kubectl config set-context default \
 
 kubectl config use-context default \
     --kubeconfig=kink.kubeconfig
-    
-rm -r ./kink-certs
+
+kubectl --kubeconfig kink.kubeconfig get all
 ```

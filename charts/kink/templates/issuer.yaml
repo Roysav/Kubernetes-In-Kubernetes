@@ -2,6 +2,33 @@
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
+  name: {{ .Release.Name }}-bootstrap
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $.Release.Name }}-root-ca
+spec:
+  secretName: {{ $.Release.Name }}-root-ca
+  commonName: CA
+  isCA: true
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+
+  issuerRef:
+    name: {{ .Release.Name }}-bootstrap
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
   name: {{ .Release.Name }}
-spec: {{- .Values.issuer.spec | toYaml | nindent 2 }}
+spec:
+  ca:
+    secretName: {{ $.Release.Name }}-root-ca
+
 {{- end }}
